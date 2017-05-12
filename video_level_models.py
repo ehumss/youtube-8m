@@ -46,6 +46,22 @@ class LogisticModel(models.BaseModel):
         weights_regularizer=slim.l2_regularizer(l2_penalty))
     return {"predictions": output}
 
+class CNNModel(models.BaseModel):
+  """Conv model with L2 regularization."""
+
+  def create_model(self, model_input, vocab_size, l2_penalty=1e-8, **unused_params):
+    with slim.arg_scope([slim.max_pool2d], kernel_size=[3, 3], stride=2):
+        net = slim.conv2d(model_input, 64, [5, 5])
+        net = slim.max_pool2d(net)
+        net = slim.conv2d(net, 64, [5, 5])
+        net = slim.max_pool2d(net)
+        net = slim.flatten(net)
+        net = slim.fully_connected(net, 192)
+        output = slim.fully_connected(net, vocab_size, activation_fn=tf.nn.sigmoid,
+        weights_regularizer=slim.l2_regularizer(l2_penalty))
+        
+    return {"predictions": output}
+
 class MoeModel(models.BaseModel):
   """A softmax over a mixture of logistic models (with L2 regularization)."""
 
